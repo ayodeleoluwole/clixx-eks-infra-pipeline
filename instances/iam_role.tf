@@ -106,6 +106,8 @@ resource "aws_iam_policy" "alb_controller" {
           "elasticloadbalancing:*",
           "ec2:Describe*",
           "ec2:CreateSecurityGroup",
+          "ec2:CreateTags",
+          "ec2:DeleteTags",  
           "ec2:AuthorizeSecurityGroupIngress",
           "ec2:RevokeSecurityGroupIngress",
           "ec2:DeleteSecurityGroup",
@@ -135,8 +137,7 @@ resource "aws_iam_policy" "alb_controller" {
 #OIDC PROVIDER ROLE
 #===========================================================
 # This is what allows the ALB controller POD (running inside EKS) 
-#to prove its identity to AWS, so it can assume the IAM role 
-#that gives it permission to create ALBs"
+#to prove its identity to AWS, so it can assume the IAM role that gives it permission to create ALBs"
 
 resource "aws_iam_openid_connect_provider" "clixx" {
   client_id_list  = ["sts.amazonaws.com"]
