@@ -201,10 +201,10 @@ pipeline {
         }
     }
 
-    post {
-        success { echo "Base infra provisioned successfully" }
-        failure { echo "Base infra pipeline failed — check logs" }
-    }
+    // post {
+    //     success { echo "Base infra provisioned successfully" }
+    //     failure { echo "Base infra pipeline failed — check logs" }
+    // }
 
 }
 
