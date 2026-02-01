@@ -199,7 +199,27 @@ pipeline {
                 slackSend (color: '#FFFF00', message: "VULNERABILTY REPORT COMPLETED by '${env.RUNNER}': Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})")
             }
         }
+
+        stage('Approve Destroy') {
+            steps {
+                input message: 'Want to Destroy infrastructure?'
+            }
+        }
+
+        stage('Destroy Infrastructure'){
+            steps {
+                slackSend (color: '#FFFF00', message: "DESTROYING INFRASTRUCTURE BUILD by '${env.RUNNER}': Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})")
+                 sh """
+                 cd instances
+                 terraform destroy -auto-approve
+                 """
+                 slackSend (color: '#FFFF00', message: "INFRASTRUCTURE SUCCESSFULLY DESTROYED by '${env.RUNNER}': Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})")                          
+            }
+        }
+
+        
     }
+
 
     // post {
     //     success { echo "Base infra provisioned successfully" }
@@ -214,3 +234,5 @@ pipeline {
         def tfHome= tool name: 'terraform-14', type: 'terraform'
         return tfHome
     }
+
+    
