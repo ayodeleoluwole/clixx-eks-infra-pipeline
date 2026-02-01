@@ -75,20 +75,29 @@ resource "aws_security_group" "rds-sg" {
   # Allow EKS (port 3306) traffic ONLY from the Eks worker node security group
   ingress {
     security_groups = [aws_security_group.eks_nodes_sg.id]    #Instead of receiving traffuc from cidr_cidr_blocks =  ["0.0.0.0/0"] whch allows traffic from the internet
-    from_port   = 3306
-    to_port     = 3306
-    protocol    = "tcp"
-    description = "Allow MySQL from EKS worker nodes"  
+    from_port       = 3306
+    to_port         = 3306
+    protocol        = "tcp"
+    description     = "Allow MySQL from EKS worker nodes"  
   }
 
 
-    # Allow Jenkins server to connect to RDS on port 3306.
+  # Allow Jenkins server to connect to RDS on port 3306.
   ingress {
     from_port   = 3306
     to_port     = 3306
     protocol    = "tcp"
     cidr_blocks = [data.aws_vpc.jenkins.cidr_block]
     description = "Allow MySQL from Jenkins VPC"
+  }
+
+  #allow traffic from any pod running in the EKS cluster
+  ingress {
+    from_port       = 3306
+    to_port         = 3306
+    protocol        = "tcp"
+    security_groups = [aws_eks_cluster.clixx-app.vpc_config[0].cluster_security_group_id]
+    description     = "Allow MySQL from EKS pods"
   }
 
   
