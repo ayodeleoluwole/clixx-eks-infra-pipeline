@@ -206,6 +206,45 @@ pipeline {
             }
         }
 
+
+
+
+        stage ('Delete CliXX Database') {
+            steps {
+             slackSend (color: '#FFFF00', message: "DELETING CLIXXRETAIL DATABASE by '${env.RUNNER}': Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})")
+             
+              sh '''
+
+                python3 -m venv python3-virtualenv
+                source python3-virtualenv/bin/activate
+
+                python3 -m pip install --upgrade pip
+
+                pip install boto3 botocore ansible
+
+                # Install required Ansible collection
+                ansible-galaxy collection install amazon.aws --force
+
+
+                # Run playbook
+                ansible-playbook $WORKSPACE/deploy_db_ansible/delete_db.yml
+
+                deactivate
+
+
+              '''
+            }
+        }
+
+
+
+
+
+
+
+
+
+
         stage('Destroy Infrastructure'){
             steps {
                 slackSend (color: '#FFFF00', message: "DESTROYING INFRASTRUCTURE BUILD by '${env.RUNNER}': Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})")
