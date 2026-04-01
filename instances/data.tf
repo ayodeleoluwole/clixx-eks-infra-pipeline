@@ -27,3 +27,15 @@ data "tls_certificate" "clixx" {
 }
 
 
+# Fetch Jenkins instance details dynamically
+data "aws_instance" "jenkins" {
+  filter {
+    name   = "tag:Name"
+    values = ["Jenkins_server"]
+  }
+
+  filter {
+    name   = "instance-state-name"
+    values = ["running"]
+  }
+}

@@ -32,24 +32,38 @@ pipeline {
          }
 
         stage('Terraform Plan'){
-             steps {
-                 sh """
-                 cd instances
-                 terraform plan -out=tfplan -input=false
-                 """                          
-         }
-         }
+            steps {
+                withCredentials([
+                    string(credentialsId: 'GRAFANA_PASSWORD', variable: 'GRAFANA_PASSWORD'),
+                    string(credentialsId: 'SLACK_WEBHOOK_URL', variable: 'SLACK_WEBHOOK_URL')
+                ]) {
+              
+                    sh """
+                    cd instances
+                    terraform plan \
+                    -var="grafana_admin_password=${GRAFANA_PASSWORD}" \
+                    -var="slack_webhook_url=${SLACK_WEBHOOK_URL}" \
+                     -out=tfplan -input=false
+                    """                          
+                }
+            }
+        }
 
         stage('Deploy Infrastructure'){
-             steps {
-                 slackSend (color: '#FFFF00', message: "STARTING INFRASTRUCTURE BUILD by '${env.RUNNER}': Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})")
-                 sh """
-                 cd instances
-                 terraform apply -auto-approve
-                 """                          
-         }
-         }
+            steps {
+                slackSend (color: '#FFFF00', message: "STARTING INFRASTRUCTURE BUILD by '${env.RUNNER}': Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})")
+                withCredentials([
+                    string(credentialsId: 'GRAFANA_PASSWORD', variable: 'GRAFANA_PASSWORD'),
+                    string(credentialsId: 'SLACK_WEBHOOK_URL', variable: 'SLACK_WEBHOOK_URL')
+                ]) {
 
+                    sh """
+                    cd instances
+                    terraform apply -auto-approve
+                    """                          
+                }
+            }
+        }
 
 
         stage('Configure VPC Peering Route') {
@@ -148,21 +162,24 @@ pipeline {
             steps {
              slackSend (color: '#FFFF00', message: "CONFIGURING CLIXXRETAIL DATABASE by '${env.RUNNER}': Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})")
              
-              withCredentials([string(credentialsId: 'DB_USER_NAME', variable: 'DB_USER_NAME'), string(credentialsId: 'DB_PASSWORD', variable: 'DB_PASSWORD'), string(credentialsId: 'DB_NAME', variable: 'DB_NAME'), string(credentialsId: 'RDS_ENDPOINT', variable: 'RDS_ENDPOINT')]){
-              sh '''
-               USERNAME=${DB_USER_NAME}
-               PASSWORD=${DB_PASSWORD}
-               DBNAME=${DB_NAME}
-               SERVER_IP=$(curl -s http://checkip.dyndns.org | sed -e 's/.*Current IP Address: //' -e 's/<.*$//')
-               #LOAD_BALANCER=$(cd instances && terraform output -raw lb_endpoint)
-               RDS_ENDPOINT=${RDS_ENDPOINT}
+                withCredentials([
+                    string(credentialsId: 'DB_USER_NAME', variable: 'DB_USER_NAME'),
+                    string(credentialsId: 'DB_PASSWORD', variable: 'DB_PASSWORD'),
+                    string(credentialsId: 'DB_NAME', variable: 'DB_NAME'),
+                    string(credentialsId: 'RDS_ENDPOINT', variable: 'RDS_ENDPOINT')
+                ]){
+                    sh '''
+                    USERNAME=${DB_USER_NAME}
+                    PASSWORD=${DB_PASSWORD}
+                    DBNAME=${DB_NAME}
+                    SERVER_IP=$(curl -s http://checkip.dyndns.org | sed -e 's/.*Current IP Address: //' -e 's/<.*$//')
+                    #LOAD_BALANCER=$(cd instances && terraform output -raw lb_endpoint)
+                    RDS_ENDPOINT=${RDS_ENDPOINT}
 
-               echo "use $DBNAME;" > $WORKSPACE/db.setup
-               echo "UPDATE wp_options SET option_value = 'http://$SERVER_IP' WHERE option_value LIKE 'http%';">> $WORKSPACE/db.setup
-               mysql -u $USERNAME --password=$PASSWORD -h $RDS_ENDPOINT  -D  $DBNAME < $WORKSPACE/db.setup
-
-
-              '''
+                    echo "use $DBNAME;" > $WORKSPACE/db.setup
+                    echo "UPDATE wp_options SET option_value = 'http://$SERVER_IP' WHERE option_value LIKE 'http%';">> $WORKSPACE/db.setup
+                    mysql -u $USERNAME --password=$PASSWORD -h $RDS_ENDPOINT  -D  $DBNAME < $WORKSPACE/db.setup
+                    '''
               }
           }
         }
@@ -236,23 +253,22 @@ pipeline {
             }
         }
 
-
-
-
-
-
-
-
-
-
         stage('Destroy Infrastructure'){
             steps {
                 slackSend (color: '#FFFF00', message: "DESTROYING INFRASTRUCTURE BUILD by '${env.RUNNER}': Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})")
-                 sh """
-                 cd instances
-                 terraform destroy -auto-approve
-                 """
-                 slackSend (color: '#FFFF00', message: "INFRASTRUCTURE SUCCESSFULLY DESTROYED by '${env.RUNNER}': Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})")                          
+                withCredentials([
+                    string(credentialsId: 'GRAFANA_PASSWORD', variable: 'GRAFANA_PASSWORD'),
+                    string(credentialsId: 'SLACK_WEBHOOK_URL', variable: 'SLACK_WEBHOOK_URL')
+                ]) {
+
+                    sh """
+                    cd instances
+                    terraform destroy \
+                        -var="grafana_admin_password=${GRAFANA_PASSWORD}" \
+                        -var="slack_webhook_url=${SLACK_WEBHOOK_URL}" \
+                        -auto-approve
+                    """
+                    slackSend (color: '#FFFF00', message: "INFRASTRUCTURE SUCCESSFULLY DESTROYED by '${env.RUNNER}': Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})")                          
             }
         }
 

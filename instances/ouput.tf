@@ -43,3 +43,16 @@ output "aws_account_id" {
   description = "Used to construct ECR login endpoint in deployment pipeline"
   value       = data.aws_caller_identity.current.account_id
 }
+
+
+output "monitoring_namespace" {
+  description = "Namespace where Prometheus/Grafana/Alertmanager are installed"
+  value       = var.monitoring_namespace
+}
+
+#This is the name of your own copy of helm chart which you installed into the cluster
+output "grafana_release_name" {
+  description = "Helm release name for kube-prometheus-stack"
+  value       = helm_release.kube_prometheus_stack.name
+}
+

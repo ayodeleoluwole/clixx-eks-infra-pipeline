@@ -70,9 +70,6 @@ variable "node_min_size" {
 variable "node_max_size" {
   type    = number
   default = 4
-<<<<<<< HEAD
-}
-=======
 }
 
 
@@ -105,4 +102,3 @@ variable "jenkins_port" {
  type        = string
   default     = "8080"
 }
->>>>>>> 396c573 (chore: update variable definitions)

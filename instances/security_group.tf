@@ -68,7 +68,7 @@ resource "aws_security_group" "eks_nodes_sg" {
 #========================================================================
 resource "aws_security_group" "rds-sg" {
   vpc_id     = aws_vpc.clixx-vpc.id
-  name       = "RDS-SG"
+  name       = "${var.project}-RDS-SG"
   description = "Allow RDS traffic from EKS SG only"
 
 
