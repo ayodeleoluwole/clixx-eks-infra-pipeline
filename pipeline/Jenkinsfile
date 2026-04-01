@@ -28,7 +28,7 @@ pipeline {
                  cd instances
                  terraform init -upgrade 
                  """                  
-         }
+            }
          }
 
         stage('Terraform Plan'){
@@ -269,10 +269,11 @@ pipeline {
                         -auto-approve
                     """
                     slackSend (color: '#FFFF00', message: "INFRASTRUCTURE SUCCESSFULLY DESTROYED by '${env.RUNNER}': Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})")                          
+                }
             }
-        }
 
         
+        }
     }
 
 
@@ -288,6 +289,6 @@ pipeline {
  def getTerraformPath(){
         def tfHome= tool name: 'terraform-14', type: 'terraform'
         return tfHome
-    }
+}
 
     
