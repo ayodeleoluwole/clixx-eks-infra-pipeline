@@ -266,5 +266,9 @@ resource "helm_release" "kube_prometheus_stack" {
     value = "7d"
   }
 
-  depends_on = [aws_eks_node_group.clixxretail]
+  depends_on = [
+    aws_eks_node_group.clixxretail,
+    helm_release.alb_controller
+  ]
+  
 }
