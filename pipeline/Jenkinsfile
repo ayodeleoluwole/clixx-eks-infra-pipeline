@@ -1,8 +1,5 @@
 pipeline {
     agent any
-//  parameters {
-//   credentials credentialType: 'com.cloudbees.jenkins.plugins.awscredentials.AWSCredentialsImpl', defaultValue: 'AWS_CREDS_AUTOMATION_ACCT', name: 'AWS_AUTOMATION_ACCOUNT_CRED', required: false
-// }
 
     environment {
         PATH = "${PATH}:${getTerraformPath()}"
@@ -180,8 +177,6 @@ pipeline {
           }
         }
 
-
-
            
         // Wait for Inspector2 to scan
         stage('Wait for Inspector Scan') {
@@ -213,63 +208,7 @@ pipeline {
             }
         }
 
-        stage('Approve Destroy') {
-            steps {
-                input message: 'Want to Destroy infrastructure?'
-            }
-        }
 
-
-
-
-        stage ('Delete CliXX Database') {
-            steps {
-             slackSend (color: '#FFFF00', message: "DELETING CLIXXRETAIL DATABASE by '${env.RUNNER}': Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})")
-             
-              sh '''
-
-                python3 -m venv python3-virtualenv
-                source python3-virtualenv/bin/activate
-
-                python3 -m pip install --upgrade pip
-
-                pip install boto3 botocore ansible
-
-                # Install required Ansible collection
-                ansible-galaxy collection install amazon.aws --force
-
-
-                # Run playbook
-                ansible-playbook $WORKSPACE/deploy_db_ansible/delete_db.yml
-
-                deactivate
-
-
-              '''
-            }
-        }
-
-        stage('Destroy Infrastructure'){
-            steps {
-                slackSend (color: '#FFFF00', message: "DESTROYING INFRASTRUCTURE BUILD by '${env.RUNNER}': Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})")
-                withCredentials([
-                    string(credentialsId: 'GRAFANA_PASSWORD', variable: 'GRAFANA_PASSWORD'),
-                    string(credentialsId: 'SLACK_WEBHOOK_URL', variable: 'SLACK_WEBHOOK_URL')
-                ]) {
-
-                    sh """
-                    cd instances
-                    terraform destroy \
-                        -var="grafana_admin_password=${GRAFANA_PASSWORD}" \
-                        -var="slack_webhook_url=${SLACK_WEBHOOK_URL}" \
-                        -auto-approve
-                    """
-                    slackSend (color: '#FFFF00', message: "INFRASTRUCTURE SUCCESSFULLY DESTROYED by '${env.RUNNER}': Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})")                          
-                }
-            }
-
-        
-        }
     }
 
 
