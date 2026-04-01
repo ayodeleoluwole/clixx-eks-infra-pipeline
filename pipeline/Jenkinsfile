@@ -55,7 +55,7 @@ pipeline {
                     sh """
                     cd instances
                     
-                    terraform apply -auto-approve
+                    terraform apply -auto-approve tfplan
                     """                          
             }
             
