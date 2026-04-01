@@ -70,4 +70,39 @@ variable "node_min_size" {
 variable "node_max_size" {
   type    = number
   default = 4
+<<<<<<< HEAD
 }
+=======
+}
+
+
+#===========================================================
+# MONITORING Prometheus and Grafana variables
+#===========================================================
+
+variable "monitoring_namespace" {
+  type        = string
+  default     = "monitoring"
+}
+
+variable "kube_prometheus_stack_version" {
+  type        = string
+  default     = "61.3.2"
+}
+
+variable "grafana_admin_password" {
+  type        = string
+  sensitive   = true
+}
+
+
+variable "slack_webhook_url" {
+  type        = string
+  sensitive   = true
+}
+
+variable "jenkins_port" {
+ type        = string
+  default     = "8080"
+}
+>>>>>>> 396c573 (chore: update variable definitions)
