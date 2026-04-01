@@ -7,3 +7,5 @@
 # sensitive / runtime
 terraform.tfvars
 s3.tf
+instances/test_instances_kp
+instances/test_instances_kp.pub
