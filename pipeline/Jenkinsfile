@@ -52,13 +52,9 @@ pipeline {
         stage('Deploy Infrastructure'){
             steps {
                 slackSend (color: '#FFFF00', message: "STARTING INFRASTRUCTURE BUILD by '${env.RUNNER}': Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})")
-                withCredentials([
-                    string(credentialsId: 'GRAFANA_PASSWORD', variable: 'GRAFANA_PASSWORD'),
-                    string(credentialsId: 'SLACK_WEBHOOK_URL', variable: 'SLACK_WEBHOOK_URL')
-                ]) {
-
                     sh """
                     cd instances
+                    
                     terraform apply -auto-approve
                     """                          
                 }
